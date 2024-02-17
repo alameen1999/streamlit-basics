@@ -123,7 +123,7 @@ def display_dashboard(start_date, end_date, target):
                 st.error("Please select at least one location for comparison.")
             else:
                 for location in selected_targets:
-                    percentage_change = percentage_diff(start_date, end_date, target)
+                    percentage_change = percentage_diff(start_date, end_date, location)
                     comparison_data.append({'Location': location, 'Percentage Difference': percentage_change})
                 comparison_df = pd.DataFrame(comparison_data)
                 fig = px.bar(comparison_df, x='Location', y='Percentage Difference', title=f"Percentage Difference in Population from {start_date} to {end_date}")
