@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import plotly.express as px
 
 URL = "https://raw.githubusercontent.com/marcopeix/MachineLearningModelDeploymentwithStreamlit/master/12_dashboard_capstone/data/quarterly_canada_population.csv"
 
-df = pd.read_csv(URL, dtype={'Quarter': str, 
+@st.cache_data
+def read_data():
+    df = pd.read_csv(URL, dtype={'Quarter': str, 
                             'Canada': np.int32,
                             'Newfoundland and Labrador': np.int32,
                             'Prince Edward Island': np.int32,
@@ -21,7 +22,9 @@ df = pd.read_csv(URL, dtype={'Quarter': str,
                             'Yukon': np.int32,
                             'Northwest Territories': np.int32,
                             'Nunavut': np.int32})
+    return df 
 
+df = read_data()
 st.title("Population of Canada")
 st.markdown("Source table can be found [here](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1710000901)")
 
@@ -54,6 +57,7 @@ with st.form('population-form'):
 start_date = f"{start_quater} {start_year}"
 end_date = f"{end_quater} {end_year}"
 
+@st.cache_data
 def format_date_for_comparison(date):
     if date[1] == 2:
         return float(date[2:]) + 0.25
@@ -63,7 +67,8 @@ def format_date_for_comparison(date):
         return float(date[2:]) + 0.50
     else:
         return float(date[2:])
-    
+
+@st.cache_data    
 def end_before_start(start_date, end_date):
     num_start_date = format_date_for_comparison(start_date)
     num_end_date = format_date_for_comparison(end_date)
@@ -72,13 +77,16 @@ def end_before_start(start_date, end_date):
         return True
     else:
         return False
-    
+
+@st.cache_data
 def percentage_diff(start_date, end_date, target):
     initial = df.loc[df['Quarter'] == start_date, target].item()
     final = df.loc[df['Quarter'] == end_date, target].item()
     percentage_diff = round((final - initial) / initial * 100, 2)
     return percentage_diff
     
+# Cannot cache this function, because we are returning some widget elements when you have UI elements return in some function sometimes we cache it, sometimes
+# we cannot cache it In this case we cannot cache it
 def display_dashboard(start_date, end_date, target):
     tab1, tab2, tab3 = st.tabs(["Population change", "Compare", "bar comparison"])
     
